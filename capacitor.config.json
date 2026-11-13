@@ -1,0 +1,8 @@
+{
+  "appId": "com.voidshards.game",
+  "appName": "Void Shards",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#07030f"
+  }
+}
