@@ -14,7 +14,7 @@ const COLORS = [
 const $ = id => document.getElementById(id);
 const bgCv = $('bg'), bg = bgCv.getContext('2d');
 const cv = $('game'), ctx = cv.getContext('2d');
-const screens = ['screen-title', 'screen-map', 'screen-howto', 'screen-intro', 'screen-pause', 'screen-end'];
+const screens = ['screen-title', 'screen-map', 'screen-howto', 'screen-intro', 'screen-pause', 'screen-end', 'screen-continue', 'screen-store'];
 function show(id) { screens.forEach(s => $(s).classList.toggle('hidden', s !== id)); }
 function toast(msg, ms = 1800) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), ms); }
 function vibrate(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} }
@@ -31,7 +31,7 @@ function resize() {
   dpr = Math.min(window.devicePixelRatio || 1, 2.5);
   W = window.innerWidth; H = window.innerHeight;
   for (const c of [bgCv, cv]) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
-  const top = 150, bottom = 24;
+  const top = 150, bottom = 86; // bottom leaves room for the booster bar
   cs = Math.floor(Math.min((W - 16) / COLS, (H - top - bottom) / ROWS, 76));
   ox = Math.round((W - cs * COLS) / 2);
   oy = Math.round(top + Math.max(0, (H - top - bottom - cs * ROWS) / 2));
@@ -88,6 +88,7 @@ let level = null, levelIdx = 0, grid = [], moves = 0, score = 0, state = 'menu',
 let goals = [], collected = [], bombsDefused = 0, corruptHit = false, selected = null, idleTime = 0, hint = null;
 let particles = [], fx = [], texts = [], dying = [], shake = 0, flash = 0, time = 0, nextId = 1;
 let settleWaiters = [];
+let aiming = false, adContinueUsed = false;
 
 const key = (r, c) => r * COLS + c;
 const unkey = k => [Math.floor(k / COLS), k % COLS];
@@ -110,6 +111,7 @@ function loadLevel(i) {
   levelIdx = i; level = LEVELS[i];
   moves = level.moves; score = 0; collected = [0, 0, 0, 0, 0, 0]; bombsDefused = 0; corruptHit = false;
   particles = []; fx = []; texts = []; dying = []; selected = null; hint = null; idleTime = 0;
+  aiming = false; adContinueUsed = false; $('aimbar').classList.add('hidden');
   grid = [];
   for (let r = 0; r < ROWS; r++) {
     grid.push([]);
@@ -518,7 +520,7 @@ async function endTurn() {
   if (!corruptHit) await spreadCorruption();
   corruptHit = false;
   updateHUD();
-  if (moves <= 0) return lose('Out of moves.');
+  if (moves <= 0) return outOfMoves();
   if (!hasValidMove()) { toast('No moves left: the void reshuffles'); await wait(500); shuffleInstant(); await waitSettled(); }
   busy = false;
 }
@@ -563,6 +565,8 @@ async function winSequence() {
   }
   await wait(500);
   const starsWon = level.stars.filter(s => score >= s).length || 1;
+  const earned = Economy.winReward(starsWon, !progress.stars[levelIdx]);
+  $('end-reward').textContent = '+' + earned + ' 💎';
   progress.stars[levelIdx] = Math.max(progress.stars[levelIdx] || 0, starsWon);
   progress.unlocked = Math.max(progress.unlocked, Math.min(LEVELS.length, levelIdx + 2));
   saveProgress();
@@ -570,6 +574,7 @@ async function winSequence() {
 }
 async function lose(reason) {
   state = 'lost';
+  $('end-reward').textContent = '';
   Audio2.sfx.lose();
   await wait(600);
   showEnd(false, 0, reason);
@@ -585,6 +590,87 @@ function showEnd(won, starsWon, reason) {
   $('end-stars').classList.toggle('hidden', !won);
   $('btn-next').classList.toggle('hidden', !won || levelIdx >= LEVELS.length - 1);
   show('screen-end');
+}
+
+// ---------- out of moves: continue offer ----------
+function outOfMoves() {
+  state = 'offer';
+  const left = goals.map(g => ({ g, n: goalRemaining(g) })).filter(x => x.n > 0)
+    .map(x => x.n + ' ' + (x.g.type === 'collect' ? COLORS[x.g.color].name.toLowerCase() : { score: 'points', ice: 'frost', stone: 'obsidian', corrupt: 'corruption', bombs: 'bombs' }[x.g.type]));
+  $('cont-left').textContent = 'Still needed: ' + left.join(', ');
+  const E = CONFIG.ECONOMY;
+  $('btn-cont-ad').classList.toggle('hidden', adContinueUsed);
+  $('btn-cont-ad').textContent = '▶ WATCH AD: +' + E.continueMoves + ' MOVES';
+  $('btn-cont-buy').textContent = '💎 ' + E.continueCost + ': +' + E.continueMoves + ' MOVES';
+  $('btn-cont-buy').disabled = Economy.crystals < E.continueCost;
+  show('screen-continue');
+}
+function continueGame() {
+  moves += CONFIG.ECONOMY.continueMoves; state = 'play'; show(null);
+  texts.push({ text: '+' + CONFIG.ECONOMY.continueMoves + ' MOVES', x: W / 2, y: oy + cs * 4, t: 0, life: 1.3, color: '#36e6ff', size: 34, big: true });
+  Audio2.sfx.special();
+  if (!hasValidMove()) shuffleInstant();
+  updateHUD(); busy = false;
+}
+async function watchAd() {
+  Audio2.suspend();
+  const ok = await Ads.showRewarded();
+  Audio2.resume();
+  if (!ok) toast(Ads.isReady() ? 'Ad closed early: no reward' : 'No ad available right now. Try again soon');
+  return ok;
+}
+$('btn-cont-ad').onclick = async () => { if (state !== 'offer') return; if (await watchAd()) { adContinueUsed = true; continueGame(); } };
+$('btn-cont-buy').onclick = () => { if (state === 'offer' && Economy.spend(CONFIG.ECONOMY.continueCost)) continueGame(); };
+$('btn-cont-quit').onclick = () => { if (state === 'offer') lose('Out of moves.'); };
+
+// ---------- boosters ----------
+const BOOSTERS = { hammer: { icon: '🔨', name: 'Hammer', desc: 'Smash any one tile. Free, no move used.' }, shuffle: { icon: '🔀', name: 'Shuffle', desc: 'Reshuffle the board. No move used.' }, defuse: { icon: '🛡', name: 'Defuse', desc: 'Reset every void bomb to full timer.' } };
+function refreshWallet() {
+  document.querySelectorAll('.crystals').forEach(el => el.textContent = Economy.crystals);
+  document.querySelectorAll('.boost').forEach(btn => {
+    const b = btn.dataset.b, n = Economy.boosters(b), bc = btn.querySelector('.bc');
+    bc.textContent = n ? n : '💎' + CONFIG.ECONOMY.prices[b]; bc.classList.toggle('price', !n);
+  });
+}
+Economy.onChange(refreshWallet);
+function setAiming(on) { aiming = on; $('aimbar').classList.toggle('hidden', !on); document.querySelector('.boost[data-b="hammer"]').classList.toggle('active', on); }
+document.querySelectorAll('.boost').forEach(btn => btn.onclick = async () => {
+  Audio2.init();
+  if (state !== 'play' || busy) return;
+  const b = btn.dataset.b;
+  if (b === 'hammer' && aiming) { setAiming(false); return; }
+  if (b === 'defuse') { let any = false; forEachGem(g => { if (g.bomb) any = true; }); if (!any) { toast('No void bombs on the board'); return; } }
+  if (!Economy.boosters(b)) {
+    if (!Economy.buyBooster(b)) { Audio2.sfx.invalid(); toast('Not enough 💎. Get more in the Store'); return; }
+    toast(BOOSTERS[b].name + ' bought');
+  }
+  if (b === 'hammer') { setAiming(true); return; }
+  Economy.useBooster(b); busy = true; selected = null; hint = null;
+  if (b === 'shuffle') { Audio2.sfx.swap(); shuffleInstant(); await waitSettled(); }
+  if (b === 'defuse') {
+    forEachGem((g, r, c) => { if (g.bomb) { g.bomb = level.bombTimer || 9; g.pop = 1; const p = center(r, c); fx.push({ type: 'ring', x: p.x, y: p.y, t: 0, life: 0.6, max: cs * 1.5, color: '#7dffa8' }); } });
+    Audio2.sfx.purge(); texts.push({ text: 'BOMBS RESET', x: W / 2, y: oy + cs * 4, t: 0, life: 1.2, color: '#7dffa8', size: 30, big: true });
+    await wait(400);
+  }
+  afterBooster();
+});
+$('btn-aim-cancel').onclick = () => setAiming(false);
+async function useHammer(r, c) {
+  setAiming(false);
+  if (!Economy.useBooster('hammer')) return;
+  busy = true; selected = null; hint = null;
+  const p = center(r, c);
+  fx.push({ type: 'ring', x: p.x, y: p.y, t: 0, life: 0.5, max: cs * 1.4, color: '#ffd34d' });
+  Audio2.sfx.boom(1); shake = 12; vibrate(40);
+  await clearCells([[r, c]]);
+  await gravity(); await resolveBoard();
+  afterBooster();
+}
+function afterBooster() {
+  updateHUD();
+  if (allGoalsDone()) return winSequence();
+  if (!hasValidMove()) shuffleInstant();
+  busy = false;
 }
 
 // ---------- particles ----------
@@ -603,6 +689,7 @@ cv.addEventListener('pointerdown', e => {
   Audio2.init();
   if (state !== 'play' || busy) return;
   const cell = cellFromPoint(e.clientX, e.clientY); if (!cell) { selected = null; return; }
+  if (aiming) { useHammer(cell[0], cell[1]); return; }
   down = { x: e.clientX, y: e.clientY, cell, moved: false };
   idleTime = 0; hint = null;
 });
@@ -888,8 +975,47 @@ function openIntro(i) {
   $('intro-tip').style.whiteSpace = 'pre-line';
   show('screen-intro');
 }
-function startLevel(i) { show(null); $('hud').classList.remove('hidden'); loadLevel(i); }
-function goMap() { gen++; settleWaiters = []; state = 'menu'; grid = []; $('hud').classList.add('hidden'); buildMap(); show('screen-map'); Audio2.setIntensity(0.1); }
+function startLevel(i) { show(null); $('hud').classList.remove('hidden'); $('boosters').classList.remove('hidden'); loadLevel(i); }
+function goMap() {
+  gen++; settleWaiters = []; state = 'menu'; grid = []; setAiming(false);
+  $('hud').classList.add('hidden'); $('boosters').classList.add('hidden');
+  buildMap(); refreshMapExtras(); show('screen-map'); Audio2.setIntensity(0.1);
+}
+function refreshMapExtras() {
+  const d = $('btn-daily'), avail = Economy.dailyAvailable();
+  d.classList.toggle('claimed', !avail); d.textContent = avail ? '🎁 DAILY REWARD' : '🎁 CLAIMED';
+  const left = Economy.adCrystalsLeft();
+  $('btn-free').textContent = left ? `▶ FREE 💎${CONFIG.ECONOMY.adCrystals} (watch ad, ${left} left today)` : 'FREE 💎: back tomorrow';
+  $('btn-free').disabled = !left;
+  refreshWallet();
+}
+function buildStore() {
+  const box = $('store-items'); box.innerHTML = '';
+  Object.entries(BOOSTERS).forEach(([k, b]) => {
+    const price = CONFIG.ECONOMY.prices[k];
+    const d = document.createElement('div'); d.className = 'item';
+    d.innerHTML = `<span class="bi">${b.icon}</span><div><b>${b.name} <small>(own ${Economy.boosters(k)})</small></b><small>${b.desc}</small></div><button>💎 ${price}</button>`;
+    const btn = d.querySelector('button'); btn.disabled = Economy.crystals < price;
+    btn.onclick = () => { if (Economy.buyBooster(k)) { Audio2.sfx.special(); toast(b.name + ' bought'); buildStore(); } };
+    box.appendChild(d);
+  });
+  refreshWallet();
+}
+$('btn-daily').onclick = () => {
+  Audio2.init();
+  const n = Economy.claimDaily();
+  if (n) { Audio2.sfx.win(); toast(`Day ${Economy.streak} reward: +${n} 💎`, 2500); } else toast('Already claimed today. Come back tomorrow!');
+  refreshMapExtras();
+};
+$('btn-free').onclick = async () => {
+  Audio2.init();
+  if (!Economy.adCrystalsLeft()) return;
+  if (await watchAd()) { const n = Economy.grantAdCrystals(); Audio2.sfx.star(0); toast('+' + n + ' 💎'); }
+  refreshMapExtras();
+};
+$('btn-store').onclick = () => { Audio2.init(); Audio2.sfx.select(); buildStore(); show('screen-store'); };
+$('btn-store-back').onclick = () => { refreshMapExtras(); show('screen-map'); };
+$('btn-privacy').onclick = async () => { if (!(await Ads.privacyOptions())) toast('Ad privacy settings are available in the Android app'); };
 
 $('btn-play').onclick = () => { Audio2.init(); Audio2.sfx.select(); goMap(); };
 $('btn-howto').onclick = () => { Audio2.init(); show('screen-howto'); };
@@ -911,7 +1037,7 @@ document.addEventListener('visibilitychange', () => {
 });
 // Android hardware back button (Capacitor)
 try {
-  const App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+  const C = window.Capacitor, App = C && C.isNativePlatform && C.isNativePlatform() ? C.registerPlugin('App') : null;
   if (App) App.addListener('backButton', () => {
     if (state === 'play') { state = 'paused'; show('screen-pause'); }
     else if (!$('screen-title').classList.contains('hidden')) App.exitApp();
@@ -921,7 +1047,7 @@ try {
 } catch (e) {}
 
 window.addEventListener('resize', resize);
-resize(); refreshAudioButtons();
+resize(); refreshAudioButtons(); refreshWallet(); Ads.init();
 requestAnimationFrame(loop);
 // debug hook for automated testing
 window.__vs = { get state() { return state; }, get busy() { return busy; }, get moves() { return moves; }, get score() { return score; }, findValidMove, attemptSwap, startLevel, goalRemaining: () => goals.map(goalRemaining) };

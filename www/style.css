@@ -73,3 +73,37 @@ canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
 #toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 24px); transform: translateX(-50%); z-index: 9; background: var(--panel); padding: 10px 18px;
   border-radius: 20px; font-weight: 700; opacity: 0; transition: opacity .3s; pointer-events: none; text-align: center; }
 #toast.show { opacity: 1; }
+
+/* ---------- monetization UI ---------- */
+.wallet { position: absolute; top: calc(env(safe-area-inset-top) + 14px); right: 16px; background: var(--panel); border: 1px solid rgba(54,230,255,0.35);
+  border-radius: 20px; padding: 6px 14px; font-weight: 900; font-size: 18px; box-shadow: 0 0 14px rgba(54,230,255,0.3); }
+.wallet .gem { margin-right: 6px; }
+.btn.gold { background: linear-gradient(180deg, #ffcf3a, #b06d00); color: #2a1400; }
+.btn.gold.claimed { filter: grayscale(1); opacity: .5; }
+#boosters { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 8px); z-index: 2; display: flex; justify-content: center; gap: 10px; padding: 0 12px; }
+.boost { position: relative; width: 84px; height: 62px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15); background: linear-gradient(180deg, #3a1a6a, #1c0b38);
+  color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-shadow: 0 0 14px rgba(150,60,255,0.35); }
+.boost:active { transform: scale(0.95); }
+.boost.active { box-shadow: 0 0 0 2px var(--gold), 0 0 22px var(--gold); }
+.boost .bi { font-size: 22px; line-height: 1; }
+.boost .bn { font-size: 10px; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+.boost .bc { position: absolute; top: -8px; right: -6px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--accent); font-size: 12px; font-weight: 900; display: grid; place-items: center; }
+.boost .bc.price { background: #0d4a63; color: #9ff2ff; }
+#aimbar { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 80px); transform: translateX(-50%); z-index: 3; background: var(--panel); border: 1px solid var(--gold);
+  border-radius: 16px; padding: 8px 8px 8px 16px; font-weight: 800; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+#aimbar .btn { min-width: 0; padding: 6px 12px; }
+.store { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 380px; }
+.store-h { margin: 8px 0 0; letter-spacing: 3px; color: var(--muted); font-size: 14px; }
+.item { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 10px 12px; }
+.item .bi { font-size: 26px; width: 34px; text-align: center; }
+.item div { flex: 1; display: flex; flex-direction: column; }
+.item small { color: var(--muted); }
+.item .price, .item button { font-weight: 900; }
+.item button { border: none; border-radius: 10px; padding: 8px 12px; background: linear-gradient(180deg, #1aa9d6, #0b5a80); color: #fff; font-size: 14px; }
+.item button:disabled { filter: grayscale(1); opacity: .5; }
+.item.soon { opacity: .55; }
+.end-reward { margin: 0; font-weight: 800; color: #9ff2ff; }
+.fake-ad { position: fixed; inset: 0; z-index: 50; background: #000; display: grid; place-items: center; }
+.fake-ad-box { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.fake-ad-box small { color: var(--gold); letter-spacing: 3px; }
+.fake-ad-count { font-size: 48px; font-weight: 900; color: var(--accent2); }

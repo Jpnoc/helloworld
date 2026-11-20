@@ -17,6 +17,28 @@ Graphics are drawn on HTML5 Canvas with glow, particles, shockwaves, screen shak
 **All audio is synthesized live** with Web Audio: a reverb'd SFX engine and an adaptive soundtrack that speeds up as the danger rises.
 There are no third-party assets, so there are no licensing issues.
 
+## Monetization
+
+Free-to-play with optional rewarded ads and a soft currency. Every level can be beaten without paying.
+
+- **Void Crystals 💎**: earned by winning (more for stars, a bonus on first clear), a daily reward with a 7-day streak, and up to 5 rewarded ads a day on the map.
+- **Boosters** (bought with crystals, no move used): Hammer (smash one tile), Shuffle, Defuse (reset all bomb timers).
+- **Out of moves**: watch one rewarded ad for +5 moves, or pay 200 💎 for +5 moves.
+- **Store**: boosters for crystals. Crystal packs ($0.99–$9.99) are placeholders until Google Play Billing is added.
+- All prices and amounts are in `www/config.js`.
+
+Ads use [`@capacitor-community/admob`](https://github.com/capacitor-community/admob) with Google's UMP consent form (GDPR/UK), shown automatically where required. In a desktop browser a fake 5-second "test ad" stands in.
+
+### Before publishing with real ads
+
+1. Create an app in [AdMob](https://admob.google.com) and a **Rewarded** ad unit.
+2. Put your **app ID** (`ca-app-pub-…~…`) in `android/app/src/main/AndroidManifest.xml` (`com.google.android.gms.ads.APPLICATION_ID`).
+3. Put your **rewarded ad unit ID** (`ca-app-pub-…/…`) in `www/config.js` as `ADMOB_REWARDED_ID` and set `USE_TEST_ADS: false`.
+4. In AdMob, set up the GDPR consent message (Privacy & messaging).
+5. In Play Console: declare **Contains ads**, and in **Data safety** declare the advertising ID and device identifiers collected by the Google Mobile Ads SDK. A privacy policy URL is required.
+
+Never tap your own real ads while testing: AdMob can ban the account. Keep `USE_TEST_ADS: true` until release.
+
 ## Project layout
 
 ```
