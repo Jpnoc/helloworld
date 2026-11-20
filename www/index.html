@@ -22,6 +22,13 @@
   <div id="objectives"></div>
 </div>
 
+<div id="boosters" class="hidden">
+  <button class="boost" data-b="hammer"><span class="bi">🔨</span><span class="bn">Hammer</span><span class="bc"></span></button>
+  <button class="boost" data-b="shuffle"><span class="bi">🔀</span><span class="bn">Shuffle</span><span class="bc"></span></button>
+  <button class="boost" data-b="defuse"><span class="bi">🛡</span><span class="bn">Defuse</span><span class="bc"></span></button>
+</div>
+<div id="aimbar" class="hidden">Tap a tile to smash it <button id="btn-aim-cancel" class="btn small ghost">CANCEL</button></div>
+
 <div id="screen-title" class="screen">
   <div class="logo"><span>VOID</span><span>SHARDS</span></div>
   <p class="tag">The abyss is hungry. Feed it nothing.</p>
@@ -31,11 +38,18 @@
     <button id="btn-sfx" class="btn small">SFX: ON</button>
   </div>
   <button id="btn-howto" class="btn small ghost">HOW TO PLAY</button>
+  <button id="btn-privacy" class="btn small ghost">PRIVACY SETTINGS</button>
 </div>
 
 <div id="screen-map" class="screen hidden">
+  <div class="wallet"><span class="gem">💎</span><span class="crystals">0</span></div>
   <h2>SELECT SECTOR</h2>
   <div id="level-grid"></div>
+  <div class="row">
+    <button id="btn-daily" class="btn small gold">🎁 DAILY</button>
+    <button id="btn-store" class="btn small">💎 STORE</button>
+  </div>
+  <button id="btn-free" class="btn small ghost">▶ FREE 💎30 (watch ad)</button>
   <button id="btn-map-back" class="btn small ghost">BACK</button>
 </div>
 
@@ -72,10 +86,33 @@
   <button id="btn-quit" class="btn small ghost">QUIT TO MAP</button>
 </div>
 
+<div id="screen-continue" class="screen hidden">
+  <h2 style="color:#ff4058">OUT OF MOVES</h2>
+  <p id="cont-left" class="tip"></p>
+  <button id="btn-cont-ad" class="btn primary">▶ WATCH AD: +5 MOVES</button>
+  <button id="btn-cont-buy" class="btn">💎 200: +5 MOVES</button>
+  <p class="tip">You have <span class="crystals">0</span> 💎</p>
+  <button id="btn-cont-quit" class="btn small ghost">GIVE UP</button>
+</div>
+
+<div id="screen-store" class="screen hidden">
+  <div class="wallet"><span class="gem">💎</span><span class="crystals">0</span></div>
+  <h2>STORE</h2>
+  <div id="store-items" class="store"></div>
+  <h3 class="store-h">CRYSTAL PACKS</h3>
+  <div class="store">
+    <div class="item soon"><span class="bi">💎</span><div><b>Pouch: 500</b><small>Coming soon</small></div><span class="price">$0.99</span></div>
+    <div class="item soon"><span class="bi">💎</span><div><b>Chest: 3,000</b><small>Coming soon</small></div><span class="price">$4.99</span></div>
+    <div class="item soon"><span class="bi">💎</span><div><b>Vault: 7,000</b><small>Coming soon</small></div><span class="price">$9.99</span></div>
+  </div>
+  <button id="btn-store-back" class="btn small ghost">BACK</button>
+</div>
+
 <div id="screen-end" class="screen hidden">
   <h2 id="end-title">SECTOR CLEARED</h2>
   <div id="end-stars" class="end-stars"><i>★</i><i>★</i><i>★</i></div>
   <p id="end-score" class="end-score"></p>
+  <p id="end-reward" class="end-reward"></p>
   <p id="end-reason" class="tip"></p>
   <button id="btn-next" class="btn primary">NEXT</button>
   <button id="btn-retry" class="btn small">RETRY</button>
@@ -84,6 +121,9 @@
 
 <div id="toast"></div>
 
+<script src="config.js"></script>
+<script src="economy.js"></script>
+<script src="ads.js"></script>
 <script src="audio.js"></script>
 <script src="levels.js"></script>
 <script src="game.js"></script>
