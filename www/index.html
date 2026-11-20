@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#07030f">
+<title>Void Shards</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="bg"></canvas>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <button id="btn-pause" class="icon-btn" aria-label="Pause">❚❚</button>
+    <div class="hud-block"><div class="hud-label">LEVEL</div><div id="hud-level" class="hud-value">1</div></div>
+    <div class="hud-block moves"><div class="hud-label">MOVES</div><div id="hud-moves" class="hud-value">20</div></div>
+    <div class="hud-block"><div class="hud-label">SCORE</div><div id="hud-score" class="hud-value">0</div></div>
+  </div>
+  <div class="starbar"><div id="starfill"></div><i class="s1">★</i><i class="s2">★</i><i class="s3">★</i></div>
+  <div id="objectives"></div>
+</div>
+
+<div id="screen-title" class="screen">
+  <div class="logo"><span>VOID</span><span>SHARDS</span></div>
+  <p class="tag">The abyss is hungry. Feed it nothing.</p>
+  <button id="btn-play" class="btn primary">PLAY</button>
+  <div class="row">
+    <button id="btn-music" class="btn small">MUSIC: ON</button>
+    <button id="btn-sfx" class="btn small">SFX: ON</button>
+  </div>
+  <button id="btn-howto" class="btn small ghost">HOW TO PLAY</button>
+</div>
+
+<div id="screen-map" class="screen hidden">
+  <h2>SELECT SECTOR</h2>
+  <div id="level-grid"></div>
+  <button id="btn-map-back" class="btn small ghost">BACK</button>
+</div>
+
+<div id="screen-howto" class="screen hidden">
+  <h2>HOW TO PLAY</h2>
+  <div class="howto">
+    <p>Swap adjacent shards to line up <b>3 or more</b> of the same kind. Finish every objective before you run out of moves.</p>
+    <p><b>4 in a row</b> → Beam Shard (clears a line)<br><b>L or T shape</b> → Nova Shard (3×3 blast)<br><b>5 in a row</b> → Prism (wipes a whole colour)<br>Swap two specials together for huge combos.</p>
+    <p class="warn"><b>Threats</b><br>
+    ⏱ <b>Void Bombs</b>: clear them before the counter hits 0 or the level fails.<br>
+    ☣ <b>Corruption</b>: spreads every turn you don't destroy some. Match next to it.<br>
+    ▣ <b>Obsidian</b>: needs two hits from adjacent matches.<br>
+    ❄ <b>Frost</b>: match on top of it to crack it.<br>
+    ⛓ <b>Chains</b>: locked shards can't move. Match them to break the chain.</p>
+  </div>
+  <button id="btn-howto-back" class="btn small">GOT IT</button>
+</div>
+
+<div id="screen-intro" class="screen hidden">
+  <h2 id="intro-title">LEVEL 1</h2>
+  <div id="intro-goals"></div>
+  <p id="intro-tip" class="tip"></p>
+  <button id="btn-intro-go" class="btn primary">START</button>
+</div>
+
+<div id="screen-pause" class="screen hidden">
+  <h2>PAUSED</h2>
+  <button id="btn-resume" class="btn primary">RESUME</button>
+  <button id="btn-restart" class="btn small">RESTART</button>
+  <div class="row">
+    <button id="btn-music2" class="btn small">MUSIC: ON</button>
+    <button id="btn-sfx2" class="btn small">SFX: ON</button>
+  </div>
+  <button id="btn-quit" class="btn small ghost">QUIT TO MAP</button>
+</div>
+
+<div id="screen-end" class="screen hidden">
+  <h2 id="end-title">SECTOR CLEARED</h2>
+  <div id="end-stars" class="end-stars"><i>★</i><i>★</i><i>★</i></div>
+  <p id="end-score" class="end-score"></p>
+  <p id="end-reason" class="tip"></p>
+  <button id="btn-next" class="btn primary">NEXT</button>
+  <button id="btn-retry" class="btn small">RETRY</button>
+  <button id="btn-end-map" class="btn small ghost">MAP</button>
+</div>
+
+<div id="toast"></div>
+
+<script src="audio.js"></script>
+<script src="levels.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
