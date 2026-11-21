@@ -1,6 +1,7 @@
 # Downloads
 
-- [VoidShards.apk](VoidShards.apk): Android test build of the original game.
-- [VoidShards-monetization.apk](VoidShards-monetization.apk): test build with crystals, boosters, the store and **test** ads (from the `feature/monetization` pull request).
+- [VoidShards-latest.apk](VoidShards-latest.apk): **newest test build** (app ID `com.jpbcommerce.voidshards`, with crystals, boosters, the store and test ads).
+- [VoidShards-monetization.apk](VoidShards-monetization.apk): older build with the old app ID.
+- [VoidShards.apk](VoidShards.apk): original build without monetization.
 
 On your phone, tap a file, then tap **Download raw file** (the download icon), open it and install.
