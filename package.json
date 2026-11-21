@@ -5,7 +5,8 @@
   "description": "Void Shards - a dark, challenging match-3 puzzle game for Android",
   "scripts": {
     "serve": "npx http-server www -p 8080 -c-1",
-    "sync": "npx cap sync android",
+    "vendor": "cp node_modules/@capacitor/core/dist/capacitor.js www/capacitor.js",
+    "sync": "npm run vendor && npx cap sync android",
     "assets": "npx capacitor-assets generate --android",
     "build:debug": "npx cap sync android && cd android && ./gradlew assembleDebug",
     "build:release": "npx cap sync android && cd android && ./gradlew bundleRelease"

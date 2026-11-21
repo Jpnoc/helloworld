@@ -5,10 +5,10 @@ def keystoreProps = new Properties()
 if (keystorePropsFile.exists()) { keystoreProps.load(new FileInputStream(keystorePropsFile)) }
 
 android {
-    namespace = "com.voidshards.game"
+    namespace = "com.jpbcommerce.voidshards"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.voidshards.game"
+        applicationId "com.jpbcommerce.voidshards"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

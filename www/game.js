@@ -1037,7 +1037,7 @@ document.addEventListener('visibilitychange', () => {
 });
 // Android hardware back button (Capacitor)
 try {
-  const C = window.Capacitor, App = C && C.isNativePlatform && C.isNativePlatform() ? C.registerPlugin('App') : null;
+  const C = window.Capacitor, App = C && C.isNativePlatform && C.isNativePlatform() ? (C.registerPlugin ? C.registerPlugin('App') : C.Plugins && C.Plugins.App) : null;
   if (App) App.addListener('backButton', () => {
     if (state === 'play') { state = 'paused'; show('screen-pause'); }
     else if (!$('screen-title').classList.contains('hidden')) App.exitApp();
@@ -1047,8 +1047,10 @@ try {
 } catch (e) {}
 
 window.addEventListener('resize', resize);
-resize(); refreshAudioButtons(); refreshWallet(); Ads.init();
+// Start the render loop first so nothing below can ever leave the game frozen.
 requestAnimationFrame(loop);
+resize(); refreshAudioButtons(); refreshWallet();
+try { Ads.init(); } catch (e) { console.warn('Ads init failed', e); }
 // debug hook for automated testing
 window.__vs = { get state() { return state; }, get busy() { return busy; }, get moves() { return moves; }, get score() { return score; }, findValidMove, attemptSwap, startLevel, goalRemaining: () => goals.map(goalRemaining) };
 })();

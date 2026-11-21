@@ -3,7 +3,9 @@
 const Ads = (() => {
   const cap = window.Capacitor;
   const native = !!(cap && cap.isNativePlatform && cap.isNativePlatform());
-  const AdMob = native ? cap.registerPlugin('AdMob') : null;
+  let AdMob = null;
+  try { if (native) AdMob = cap.registerPlugin ? cap.registerPlugin('AdMob') : (cap.Plugins && cap.Plugins.AdMob) || null; }
+  catch (e) { console.warn('AdMob plugin unavailable', e); }
   let initialized = false, canRequest = true, loading = null, loaded = false;
 
   async function init() {
