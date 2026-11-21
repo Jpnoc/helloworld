@@ -107,3 +107,5 @@ canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
 .fake-ad-box { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .fake-ad-box small { color: var(--gold); letter-spacing: 3px; }
 .fake-ad-count { font-size: 48px; font-weight: 900; color: var(--accent2); }
+
+.policy-link { color: var(--muted); font-size: 13px; }
