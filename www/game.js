@@ -1015,6 +1015,7 @@ $('btn-free').onclick = async () => {
 };
 $('btn-store').onclick = () => { Audio2.init(); Audio2.sfx.select(); buildStore(); show('screen-store'); };
 $('btn-store-back').onclick = () => { refreshMapExtras(); show('screen-map'); };
+$('link-privacy').href = CONFIG.PRIVACY_POLICY_URL;
 $('btn-privacy').onclick = async () => { if (!(await Ads.privacyOptions())) toast('Ad privacy settings are available in the Android app'); };
 
 $('btn-play').onclick = () => { Audio2.init(); Audio2.sfx.select(); goMap(); };
