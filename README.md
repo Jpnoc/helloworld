@@ -87,7 +87,7 @@ Install the APK on your phone to test it (`adb install app/build/outputs/apk/deb
 ## Publishing on Google Play
 
 1. Create a Google Play Console developer account (one-time US$25 fee) and verify your identity.
-2. Change `appId` in `capacitor.config.json` (and `applicationId`/`namespace` in `android/app/build.gradle`) to an ID you own, e.g. `com.yourname.voidshards`. It can never change after the first upload.
+2. App ID: `com.jpbcommerce.voidshards` (in `capacitor.config.json` and `applicationId`/`namespace` in `android/app/build.gradle`), matching the `com.jpbcommerce` prefix of your Spottr app. It can never change after the first upload.
 3. Create the app, then fill in: store listing (512px icon, 1024×500 feature graphic, at least 2 phone screenshots), content rating questionnaire, target audience, data safety (this game collects no data) and a privacy policy URL.
 4. Enrol in Play App Signing and upload the `.aab`.
 5. **New personal developer accounts** must run a closed test with at least 12 testers for 14 consecutive days before they can apply for production access.

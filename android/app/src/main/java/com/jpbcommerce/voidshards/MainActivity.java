@@ -1,4 +1,4 @@
-package com.voidshards.game;
+package com.jpbcommerce.voidshards;
 
 import com.getcapacitor.BridgeActivity;
 
